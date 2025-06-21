@@ -1,0 +1,32 @@
+export const handle2Home = (navigate)=>{
+    navigate('/');
+}
+
+export const handle2Users = (navigate) => {
+  navigate("/users");
+};
+
+export const handle2Tracks = (navigate) => {
+  navigate("/tracks");
+}
+
+export const handle2Track = (navigate, id) => {
+  navigate(`/tracks/${id}`);
+}
+
+export const handle2Manager = (navigate) => {
+  navigate("/manager");
+}
+
+export const handle2Error = (navigate) => {
+  navigate("*");
+}
+export const handle2Logout = (navigate) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    localStorage.removeItem("token");
+    navigate("/");
+  } else {
+    console.error("No token found in localStorage.");
+  }
+}
