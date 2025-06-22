@@ -1,35 +1,52 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-
+import { useContext, useState } from 'react';
+import Footer from './components/footer/Footer';
+import { TokenContext } from './common/context/token-context';
+import AppRouter1 from './router/AppRouter1';
+import AppRouter2 from './router/AppRouter2';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
+import { handle2Error, handle2Tracks, handle2Home, handle2Users } from './router/coordinator';
+import NavAsideNOAuth from './components/navbars/NavAsideNOAuth';
+import NavAsideAuth from './components/navbars/NavAsideAuth';
+import { TracksContext } from './common/context/tracks-context';
+import { useFetch } from './hooks/useFetch';
+import { BASE_API } from './common/CONSTANTS/CONSTANTS';
 function App() {
-  const [count, setCount] = useState(0)
-
+  const { token } = useContext(TokenContext);
+  const {data, isLoading, isError} =useFetch(BASE_API, "tracks", []);
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <BrowserRouter>
+      <AppContent token={token} tracks={data}/>
+    </BrowserRouter>
+  );
 }
 
-export default App
+function AppContent({ token, tracks }) {
+  // Agora useNavigate está dentro do contexto do BrowserRouter
+
+  console.log(tracks.data)
+  return (
+    <div className="main-grid-1">
+      <header className="a">
+        <h1 id="title" className='text-purple-700 font-bold text-4xl'><span className="text-gray-900">Colab</span>Tracks</h1>
+      </header>
+      <main className="b">
+        <aside className="ba">
+          {!token || token === null ? <NavAsideNOAuth /> : <NavAsideAuth />}
+        </aside>
+        <section className="bb" id="content">
+          {!token || token === null ? <AppRouter1 /> : <AppRouter2 />}
+        </section>
+      </main>
+      <footer className="c">
+        <p>
+          Made with ❤️ by{' '}
+          <a href="https://github.com/botechia-erika" target="_blank" rel="noopener noreferrer">
+            @Botechia-Erika
+          </a>
+        </p>
+      </footer>
+    </div>
+  );
+}
+
+export default App;
