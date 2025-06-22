@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { MdEmail } from "react-icons/md";
 import { FaUserCircle } from "react-icons/fa";
 import { FiLock } from "react-icons/fi";
@@ -6,6 +6,8 @@ import useSignUp from '../../hooks/useSignUp';
 import styled from "styled-components";
 import Swal from 'sweetalert2'
 import { BASE_API } from '../../CONSTANTS/CONSTANTS';
+import useForm from '../../hooks/useForm';
+import axios from 'axios';
 const StyledForm = styled.div`
 width: 454px;
 height: 652px;
@@ -98,59 +100,109 @@ const switchUsersPage = (state, setState)=>{
   setState(newState);
  }
 function UsersSignUp({ viewUser, setViewUser }) {
-  const { signUp, loading } = useSignUp(`http://localhost:3003/api/auth/sign-up`);
-  const [form, setForm] = useState({
-    email: '',
+  const initialState = {
     username: '',
+    email: '',
     password: '',
     confirmPassword: ''
-  });
+  };
 
-  // Regex
+  const { formState, handleOnChangeInput } = useForm(initialState);
+  const { username, email, password, confirmPassword } = formState;
+
   const usernameRegex = /^[A-Za-z0-9_]{3,30}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{4,12}$/;
 
-  const handleChange = e => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const validate = () => {
-    if (!usernameRegex.test(form.username)) {
-      Swal.fire('Erro', 'Nome de usuário inválido.', 'error');
-      return false;
-    }
-    if (!emailRegex.test(form.email) || form.email.length < 3 || form.email.length > 200) {
-      Swal.fire('Erro', 'E-mail inválido.', 'error');
-      return false;
-    }
-    if (!passwordRegex.test(form.password)) {
-      Swal.fire('Erro', 'Senha fraca.', 'error');
-      return false;
-    }
-    if (form.password !== form.confirmPassword) {
-      Swal.fire('Erro', 'As senhas não coincidem.', 'error');
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = async e => {
+  const handleOnSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
-    const token = await signUp({
-      username: form.username,
-      passwordConfirm: form.password,
-      email: form.email
-    });
-    if (token) {
-      Swal.fire('Sucesso', 'Cadastro realizado!', 'success');
-      localStorage.setItem('api_token', token);
-    } else {
-      Swal.fire('Erro', 'Erro ao cadastrar. Tente novamente.', 'error');
+
+    if (password !== confirmPassword) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'As senhas não coincidem!',
+      });
+      return;
+    }
+
+    if (!usernameRegex.test(username)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Username inválido! Deve ter entre 3 e 30 caracteres, apenas letras, números e underscores.',
+      });
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Email inválido!',
+      });
+      return;
+    }
+
+    if (!passwordRegex.test(password)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Senha inválida! Deve ter entre 4 e 12 caracteres, pelo menos uma letra maiúscula, um número e um caractere especial.',
+      });
+      return;
+    }
+
+    const formData = {
+      name: formState.username,
+      email: formState.email,
+      password: formState.confirmPassword
+    };
+
+    if (formData.name && formData.email && formData.password) {
+      try {
+        const response = await axios.post(`${BASE_API}/auth/sign-up`, formData);
+        if (response.status === 201|| response.status === 200) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Cadastro realizado com sucesso!',
+            text: 'Você já pode fazer login.',
+          });
+          setViewUser(1); // Muda para a página de login
+        }
+      } catch (error) {
+        console.error('Erro ao enviar dados:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Erro ao cadastrar usuário. Tente novamente mais tarde.',
+        });
+      }
     }
   };
+
+
+  useEffect(() => {
+    // dispara efeitos secundarios quando formState muda
+    console.log('useEffect disparado: username mudou ', formState.username);
+  }, [formState.username]);
+
+    // dispara efeitos secundarios quando formState muda
+
+useEffect(() => {
+    console.log('useEffect disparado: email mudou ', formState.email);
+  }, [formState.email]);
+
+  useEffect(() => {
+    console.log('useEffect disparado: password mudou ', formState.password);
+  }, [formState.password]);
+
+
+  useEffect(() => {
+    console.log('useEffect disparado: passwordConfirm mudou ', formState.passwordConfirm);
+  }, [formState.confirmPassword]);
+
+
 
   return (
     <StyledForm>
@@ -170,7 +222,7 @@ function UsersSignUp({ viewUser, setViewUser }) {
             </button>
           </div>
         </div>
-        <form className="signUpForm" onSubmit={handleSubmit}>
+      <form className="signUpForm" onSubmit={(e)=>{handleOnSubmit(e)}}>
           <div className="fieldset">
             <label htmlFor="email" className='labelFieldset'><MdEmail /> Email</label>
             <input
@@ -179,8 +231,8 @@ function UsersSignUp({ viewUser, setViewUser }) {
               name="email"
               placeholder="pepe@gmail.com"
               required
-              value={form.email}
-              onChange={handleChange}
+              value={email}
+              onChange={handleOnChangeInput}
             />
           </div>
           <div className="fieldset">
@@ -191,8 +243,8 @@ function UsersSignUp({ viewUser, setViewUser }) {
               name="username"
               placeholder="pepe123"
               required
-              value={form.username}
-              onChange={handleChange}
+              value={username}
+              onChange={handleOnChangeInput}
             />
           </div>
           <div className="fieldset">
@@ -203,8 +255,8 @@ function UsersSignUp({ viewUser, setViewUser }) {
               name="password"
               placeholder="********"
               required
-              value={form.password}
-              onChange={handleChange}
+              value={password}
+              onChange={handleOnChangeInput}
             />
           </div>
           <div className="fieldset">
@@ -215,16 +267,16 @@ function UsersSignUp({ viewUser, setViewUser }) {
               name="confirmPassword"
               placeholder="********"
               required
-              value={form.confirmPassword}
-              onChange={handleChange}
+              value={confirmPassword}
+              onChange={handleOnChangeInput}
             />
           </div>
           <button
             className="middle none center mr-3 rounded-lg bg-gradient-to-tr from-purple-600 to-purple-400 py-3 px-6 font-sans text-xs font-bold uppercase text-white shadow-md shadow-pink-500/20 transition-all hover:shadow-lg hover:shadow-purple-500/40 active:opacity-[0.85] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
             type="submit"
-            disabled={loading}
+            
           >
-            {loading ? "Cadastrando..." : "Cadastrar"}
+            CADASTRAR
           </button>
         </form>
       </div>
@@ -257,7 +309,7 @@ function UsersSignUp({ viewUser, setViewUser }) {
             <label htmlFor="password" className='labelFieldset'><FiLock /> Senha</label>
             <input type="password" id="password" name="password" placeholder="********" required />
         </div>
-      <button className="middle none center mr-3 rounded-lg bg-gradient-to-tr from-purple-600 to-purple-400 py-3 px-6 font-sans text-xs font-bold uppercase text-white shadow-md shadow-pink-500/20 transition-all hover:shadow-lg hover:shadow-purple-500/40 active:opacity-[0.85] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">LOGAR</button>
+      <button type='submit' className="middle none center mr-3 rounded-lg bg-gradient-to-tr from-purple-600 to-purple-400 py-3 px-6 font-sans text-xs font-bold uppercase text-white shadow-md shadow-pink-500/20 transition-all hover:shadow-lg hover:shadow-purple-500/40 active:opacity-[0.85] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">LOGAR</button>
 
       </form>
       </div>
