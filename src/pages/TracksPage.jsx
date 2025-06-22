@@ -24,7 +24,7 @@ console.log(fetchAudio)
 }
 
 export const ListTracks = ({ tracks }) => (
-  <div className="tracks-list">
+  <div className="tracksList">
     {tracks.data.map((track, index) => (
       <CardTrack key={index} track={track} />
     ))}
