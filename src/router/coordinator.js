@@ -3,7 +3,13 @@ export const handle2Home = (navigate)=>{
 }
 
 export const handle2Users = (navigate) => {
-  navigate("/users");
+  const token = localStorage.getItem("api_key");
+
+  if (token && token.length < 10) {
+    navigate("/users");
+  } else {
+    navigate("/manager");
+  }
 };
 
 export const handle2Tracks = (navigate) => {
@@ -22,8 +28,8 @@ export const handle2Error = (navigate) => {
   navigate("*");
 }
 export const handle2Logout = (navigate) => {
-  const token = localStorage.getItem("token");
-  if (token) {
+  const token =localStorage.getItem("api_key");
+  if (token && token.length > 10) {
     localStorage.removeItem("token");
     navigate("/");
   } else {
