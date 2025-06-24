@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { BASE_API } from '../../CONSTANTS/CONSTANTS' // Ensure this path is correct
+import { BASE_API } from '../../CONSTANTS/CONSTANTS'
+import { handle2Tracks } from '../../router/coordinator';
+import { useNavigate } from 'react-router-dom';
 
 const countries = [
   { code: "AF", name: "Afeganistão" },
@@ -14,7 +16,7 @@ const countries = [
   { code: "SA", name: "Arábia Saudita" },
   { code: "DZ", name: "Argélia" },
   { code: "AR", name: "Argentina" },
-  { code: "AM", "name": "Armênia" },
+  { code: "AM", name: "Armênia" },
   { code: "AW", name: "Aruba" },
   { code: "AU", name: "Austrália" },
   { code: "AT", name: "Áustria" },
@@ -230,11 +232,10 @@ function getFlagEmoji(countryCode) {
 }
 
 export default function ManagerForm() {
+  const navigate = useNavigate()
   const [step, setStep] = useState(1)
-  const [mediaId, setMediaId] = useState(null)
-
   const [dataForm, setDataForm] = useState({
-    name: "",
+    track: "",
     artistName: "",
     artistNickname: "",
     artistNationality: "",
@@ -242,8 +243,20 @@ export default function ManagerForm() {
     cover: "",
     durationStart: 0,
     durationEnd: 0,
-    mediaId: null,
+    mediaId: "",
   })
+
+  // Carregar mediaId do localStorage ao montar o componente
+  useEffect(() => {
+    const storedMediaId = localStorage.getItem('mediaId')
+    if (storedMediaId) {
+      setDataForm((prev) => ({
+        ...prev,
+        mediaId: storedMediaId
+      }))
+      setStep(2) // Se já tem mediaId, vai direto para o step 2
+    }
+  }, [])
 
   const handleOnInputChange = (e) => {
     const { name, value } = e.target
@@ -254,7 +267,6 @@ export default function ManagerForm() {
   }
 
   const handleUploadSuccess = (id) => {
-    setMediaId(id)
     setDataForm((prev) => ({
       ...prev,
       mediaId: id
@@ -265,8 +277,8 @@ export default function ManagerForm() {
   const handleOnSubmit = async (e) => {
     e.preventDefault()
 
-    const payload = {
-      name: dataForm.name,
+    const track ={
+      name: dataForm.track,
       album: dataForm.album,
       artist: {
         name: dataForm.artistName,
@@ -278,16 +290,30 @@ export default function ManagerForm() {
         start: Number(dataForm.durationStart) || 0,
         end: Number(dataForm.durationEnd) || 0,
       },
-      mediaId: dataForm.mediaId,
+      mediaId: localStorage.getItem('mediaId')
     }
 
     try {
-      await axios.post(`${BASE_API}/tracks`, payload)
+      await axios.post(`${BASE_API}/tracks`, track)
+      setDataForm({
+        track: "",
+        artistName: "",
+        artistNickname: "",
+        artistNationality: "",
+        album: "",
+        cover: "",
+        durationStart: 0,
+        durationEnd: 0,
+        mediaId: "",
+      })
+      localStorage.removeItem('mediaId') // Limpa o mediaId após o envio
       alert('Track cadastrada com sucesso!')
       // Optionally reset form or navigate
     } catch (err) {
+      console.log(err)
       console.error("Erro ao cadastrar track:", err);
       alert('Erro ao cadastrar track');
+      handle2Tracks(navigate)
     }
   }
 
@@ -337,7 +363,8 @@ function AddUpload({ onUploadSuccess }) {
         throw new Error(errorData.message || 'Erro ao fazer upload');
       }
       const data = await res.json()
-      onUploadSuccess(data.id)
+      localStorage.setItem('mediaId', data.data._id) // Salva no localStorage
+      onUploadSuccess(data.data._id)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -358,20 +385,20 @@ function AddUpload({ onUploadSuccess }) {
 }
 
 function AddTracks({ dataForm, onInputChange, countries, getFlagEmoji }) {
-  const { name, album, artistName, artistNickname, artistNationality, durationEnd, cover } = dataForm;
+  const { track, album, artistName, artistNickname, artistNationality, durationEnd, cover } = dataForm;
 
   return (
     <div>
-      <p>ID do arquivo carregado: {dataForm.mediaId}</p> {/* Use dataForm.mediaId directly */}
+      <p>ID do arquivo carregado: {dataForm.mediaId}</p>
       <div className="fieldset">
-        <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+        <label htmlFor="track" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
           Nome da Música:
           <input
             onChange={onInputChange}
-            value={name}
+            value={track}
             type="text"
-            id="name"
-            name="name"
+            id="track"
+            name="track"
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
           />
         </label>
