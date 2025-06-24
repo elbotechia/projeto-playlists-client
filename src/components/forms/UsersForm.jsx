@@ -12,17 +12,13 @@ import { handle2Manager, handle2Users } from '../../router/coordinator';
 import { useNavigate } from 'react-router-dom';
 import { TokenContext } from '../../common/context/token-context';
 const StyledForm = styled.div`
-width: 454px;
-height: 652px;
-flex-shrink: 0;
-border-radius: 43px;
 background: #FFF;
 display: flex;
-flex-flow: column nowrap;
+flex-flow: row nowrap;
 align-items: center;
 justify-content: center;
 justify-self: center;
-align-self: flex-start;
+align-self: center;
 
 
 .fieldset{
@@ -30,8 +26,8 @@ display: flex;
 flex-flow: row nowrap;
 align-items: center;
 justify-content: flex-start;
-width: 353px;
-height: 54.667px;
+width: 250px;
+
 padding: 9px 16px;
 align-items: center;
 gap: 8px;

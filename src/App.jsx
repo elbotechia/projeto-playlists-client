@@ -26,31 +26,25 @@ function AppContent({ token, tracks }) {
 
   console.log(tracks.data)
   return (
+    <div className="container">
     <div className="main-grid-1">
-      <header className="a">
-        <h1 id="title" className='text-purple-700 font-bold text-4xl'><span className="text-gray-900">Colab</span>Tracks</h1>
-      </header>
-      <main className="b">
-<aside className="ba">
-  {      token === "null" ||
-      token === "undefined" ||
-      token === null ||
-      token === undefined ||
-      token === "undefined" ||
-      token === "null" ||
-      token === "" ||
-      token === " " ||
-      token === "  "||
-      !token
+      <header className="a p-4">
+        <h1 id="title" className='text-center m-3 text-purple-700 font-bold text-4xl'><span className="text-gray-900">Colab</span>Tracks</h1>
+     
+     <div>
+  {  !token || token === "null"||token.length === 1
     ? <NavAsideNOAuth />
     : <NavAsideAuth />}
-</aside>
-<section className="bb" id="content">
+</div>
+      </header>
+      <main className="b p-3">
+
+<section className="bb m-5 text-center" id="content">
   
     <AppRouter1 />
 </section>
       </main>
-      <footer className="c">
+      <footer className="c text-center mt-5 p-3">
         <p>
           Made with ❤️ by{' '}
           <a href="https://github.com/botechia-erika" target="_blank" rel="noopener noreferrer">
@@ -58,6 +52,7 @@ function AppContent({ token, tracks }) {
           </a>
         </p>
       </footer>
+    </div>
     </div>
   );
 }

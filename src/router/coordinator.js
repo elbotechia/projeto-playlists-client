@@ -3,13 +3,9 @@ export const handle2Home = (navigate)=>{
 }
 
 export const handle2Users = (navigate) => {
-  const token = localStorage.getItem("api_key");
-
-  if (token && token.length < 10) {
+ 
     navigate("/users");
-  } else {
-    navigate("/manager");
-  }
+
 };
 
 export const handle2Tracks = (navigate) => {
