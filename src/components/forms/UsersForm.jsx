@@ -1,89 +1,111 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { MdEmail } from "react-icons/md";
 import { FaUserCircle } from "react-icons/fa";
 import { FiLock } from "react-icons/fi";
-import useSignUp from '../../hooks/useSignUp';
-import styled from "styled-components";
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
 import { BASE_API } from '../../CONSTANTS/CONSTANTS';
 import useForm from '../../hooks/useForm';
 import axios from 'axios';
-import { handle2Manager, handle2Users } from '../../router/coordinator';
+import { handle2Manager } from '../../router/coordinator';
 import { useNavigate } from 'react-router-dom';
-import { TokenContext } from '../../common/context/token-context';
-const StyledForm = styled.div`
-background: #FFF;
-display: flex;
-flex-flow: row nowrap;
-align-items: center;
-justify-content: center;
-justify-self: center;
-align-self: center;
 
 
-.fieldset{
-display: flex;
-flex-flow: row nowrap;
-align-items: center;
-justify-content: flex-start;
-width: 250px;
+function UserRecovery({ setViewUser }) {
+  const initialState = {
+    email: ''
+  };
 
-padding: 9px 16px;
-align-items: center;
-gap: 8px;
-flex-shrink: 0;
-border-radius: 6px;
-border: 1px solid #DEE2E6;
-background: #F1F4FF;
-margin: 30px auto;
-}
+  const { formState, handleOnChangeInput } = useForm(initialState);
+  const { email } = formState;
 
-.labelFieldset{
-display: flex;
-gap: 8px;
-align-items: center;
-justify-content: center;
-width: 100%;
-}   
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-input{
-width: 100%;
-height: 36px;
-background: transparent;
-border: none;
-text-align: left;
-padding-left: 8px;
-}
+  const handleOnSubmit = async (e) => {
+    e.preventDefault();
 
-input:active, input:focus, input:focus-visible, input:hover , input:focus-within, input:outline{
-border: none!important;
-border-radius: 6px;
+    if (!emailRegex.test(email)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Email inválido!',
+      });
+      return;
+    }
 
+    // Simular envio de email de recuperação
+    Swal.fire({
+      icon: 'success',
+      title: 'Email enviado!',
+      text: 'Se o email estiver cadastrado, você receberá as instruções para recuperar sua senha.',
+    });
+    
+    setViewUser(1); // Volta para o login
+  };
 
-}
-
-`
-
-
-function UserRecovery(){
   return (
-    <div>
-      <h2>Recuperação de Conta</h2>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="glass p-8 rounded-3xl w-full max-w-md animate-slide-up">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-white mb-2 font-display">
+            <span className="text-white">Recuperar</span>
+            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Conta</span>
+          </h2>
+          <p className="text-white/70 mb-6">Digite seu email para receber instruções de recuperação</p>
+          
+          <button
+            type="button"
+            className="nav-button bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700"
+            onClick={() => setViewUser(1)}
+          >
+            ← Voltar ao Login
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleOnSubmit} className="space-y-6">
+          {/* Email Field */}
+          <div className="space-y-2">
+            <label htmlFor="email" className="flex items-center gap-2 text-white/80 font-medium">
+              <MdEmail className="text-purple-400" />
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="seu@email.com"
+              required
+              value={email}
+              onChange={handleOnChangeInput}
+              className="input-modern w-full text-white placeholder-white/50"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+          >
+            📧 ENVIAR INSTRUÇÕES
+          </button>
+        </form>
+      </div>
     </div>
-  )
+  );
 }
 
 
 
-const switchUsersPage = (state, setState)=>{
-  if(state === 2){
-    return <UsersRecovery />
-  }else if(state === 1){
-    return <UsersSignIn viewUser={state} setViewUser={setState} />
-  }else{
-    return <UsersSignUp viewUser={state} setViewUser={setState}/>
+const switchUsersPage = (state, setState) => {
+  if (state === 2) {
+    return <UserRecovery setViewUser={setState} />;
+  } else if (state === 1) {
+    return <UsersSignIn setViewUser={setState} />;
+  } else {
+    return <UsersSignUp setViewUser={setState} />;
   }
-}
+};
 
  const UsersForm = ()=>{
   const [viewUser, setViewUser] = useState(0);
@@ -95,10 +117,8 @@ const switchUsersPage = (state, setState)=>{
  }
 
 
- const switchButtons = (state, setState, newState)=>{
-  setState(newState);
- }
-function UsersSignUp({ viewUser, setViewUser }) {
+
+function UsersSignUp({ setViewUser }) {
   const initialState = {
     username: '',
     email: '',
@@ -111,7 +131,7 @@ function UsersSignUp({ viewUser, setViewUser }) {
 
   const usernameRegex = /^[A-Za-z0-9_]{3,30}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{4,12}$/;
+  const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{4,12}$/;
 
   const handleOnSubmit = async (e) => {
     e.preventDefault();
@@ -167,7 +187,7 @@ function UsersSignUp({ viewUser, setViewUser }) {
             title: 'Cadastro realizado com sucesso!',
             text: 'Você já pode fazer login.',
           });
-          setViewUser(1); // Muda para a página de login
+          setViewUser(1);
         }
       } catch (error) {
         console.error('Erro ao enviar dados:', error);
@@ -180,15 +200,11 @@ function UsersSignUp({ viewUser, setViewUser }) {
     }
   };
 
-
   useEffect(() => {
-    // dispara efeitos secundarios quando formState muda
     console.log('useEffect disparado: username mudou ', formState.username);
   }, [formState.username]);
 
-    // dispara efeitos secundarios quando formState muda
-
-useEffect(() => {
+  useEffect(() => {
     console.log('useEffect disparado: email mudou ', formState.email);
   }, [formState.email]);
 
@@ -196,205 +212,255 @@ useEffect(() => {
     console.log('useEffect disparado: password mudou ', formState.password);
   }, [formState.password]);
 
-
   useEffect(() => {
-    console.log('useEffect disparado: passwordConfirm mudou ', formState.passwordConfirm);
+    console.log('useEffect disparado: passwordConfirm mudou ', formState.confirmPassword);
   }, [formState.confirmPassword]);
 
-
-
   return (
-    <StyledForm>
-      <div>
-        <div className="bannerSignUp">
-          <h2 className="formTitle text-center text-purple-600 font-bold text-2xl">
-            <strong className="text-gray-900">Colab.</strong>Cadastro
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="glass p-8 rounded-3xl w-full max-w-md animate-slide-up">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-white mb-2 font-display">
+            <span className="text-white">Colab</span>
+            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Cadastro</span>
           </h2>
-          <p className="slogan">Aproveite para criar sua conta ou faça seu Login</p>
-          <div className="flex-row justify-items-center justify-self-center align-items-center gap-2">
-            <button
-              type="button"
-              className="middle none center mt-3 mr-3 rounded-lg bg-gradient-to-tr from-purple-600 to-purple-400 py-3 px-6 font-sans text-xs font-bold uppercase text-white shadow-md shadow-pink-500/20 transition-all hover:shadow-lg hover:shadow-purple-500/40 active:opacity-[0.85] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-              onClick={() => switchButtons(viewUser, setViewUser, 1)}
-            >
-              Click para LOGAR
-            </button>
-          </div>
+          <p className="text-white/70 mb-6">Crie sua conta e junte-se à nossa comunidade musical</p>
+          
+          <button
+            type="button"
+            className="nav-button bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
+            onClick={() => setViewUser(1)}
+          >
+            🔑 Já tenho conta
+          </button>
         </div>
-      <form className="signUpForm" onSubmit={(e)=>{handleOnSubmit(e)}}>
-          <div className="fieldset">
-            <label htmlFor="email" className='labelFieldset'><MdEmail /> Email</label>
+
+        {/* Form */}
+        <form onSubmit={handleOnSubmit} className="space-y-6">
+          {/* Email Field */}
+          <div className="space-y-2">
+            <label htmlFor="email" className="flex items-center gap-2 text-white/80 font-medium">
+              <MdEmail className="text-purple-400" />
+              Email
+            </label>
             <input
               type="email"
               id="email"
               name="email"
-              placeholder="pepe@gmail.com"
+              placeholder="seu@email.com"
               required
               value={email}
               onChange={handleOnChangeInput}
+              className="input-modern w-full text-white placeholder-white/50"
             />
           </div>
-          <div className="fieldset">
-            <label htmlFor="username" className='labelFieldset'><FaUserCircle /> Username</label>
+
+          {/* Username Field */}
+          <div className="space-y-2">
+            <label htmlFor="username" className="flex items-center gap-2 text-white/80 font-medium">
+              <FaUserCircle className="text-purple-400" />
+              Nome de usuário
+            </label>
             <input
               type="text"
               id="username"
               name="username"
-              placeholder="pepe123"
+              placeholder="usuario123"
               required
               value={username}
               onChange={handleOnChangeInput}
+              className="input-modern w-full text-white placeholder-white/50"
             />
           </div>
-          <div className="fieldset">
-            <label htmlFor="password" className='labelFieldset'><FiLock /> Senha</label>
+
+          {/* Password Field */}
+          <div className="space-y-2">
+            <label htmlFor="password" className="flex items-center gap-2 text-white/80 font-medium">
+              <FiLock className="text-purple-400" />
+              Senha
+            </label>
             <input
               type="password"
               id="password"
               name="password"
-              placeholder="********"
+              placeholder="••••••••"
               required
               value={password}
               onChange={handleOnChangeInput}
+              className="input-modern w-full text-white placeholder-white/50"
             />
           </div>
-          <div className="fieldset">
-            <label htmlFor="confirmPassword" className='labelFieldset'><FiLock /> Confirmar Senha</label>
+
+          {/* Confirm Password Field */}
+          <div className="space-y-2">
+            <label htmlFor="confirmPassword" className="flex items-center gap-2 text-white/80 font-medium">
+              <FiLock className="text-purple-400" />
+              Confirmar Senha
+            </label>
             <input
               type="password"
               id="confirmPassword"
               name="confirmPassword"
-              placeholder="********"
+              placeholder="••••••••"
               required
               value={confirmPassword}
               onChange={handleOnChangeInput}
+              className="input-modern w-full text-white placeholder-white/50"
             />
           </div>
+
+          {/* Submit Button */}
           <button
-            className="middle none center mr-3 rounded-lg bg-gradient-to-tr from-purple-600 to-purple-400 py-3 px-6 font-sans text-xs font-bold uppercase text-white shadow-md shadow-pink-500/20 transition-all hover:shadow-lg hover:shadow-purple-500/40 active:opacity-[0.85] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
             type="submit"
-            
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
           >
-            CADASTRAR
+            🚀 CRIAR CONTA
           </button>
         </form>
       </div>
-    </StyledForm>
+    </div>
   );
 }
 
 
- function UsersSignIn({viewUser, setViewUser}) {
+ function UsersSignIn({ setViewUser }) {
   const initialState = {
-  email: '',
-  password: ''
-};
-
-const { formState, handleOnChangeInput } = useForm(initialState);
-const { email, password } = formState;
- const { token , setToken} = useContext(TokenContext);
-
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const navigate = useNavigate();
-const handleOnSubmit = async (e) => {
-  e.preventDefault();
-
-  
-  if (!emailRegex.test(email)) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: 'Email inválido!',
-    });
-    return;
-  }
-
-  if (!password || password.length < 4) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: 'Senha inválida! Deve ter pelo menos 4 caracteres.',
-    });
-    return;
-  }
-
-  const formData = {
-    email,
-    password
+    email: '',
+    password: ''
   };
-  try {
-    const response = await axios.post(`${BASE_API}/auth/sign-in`, formData);
-    // Corrigido: acessar o token dentro de response.data.data
-    if (response.status === 200 && response.data.data && response.data.data.token) {
-    
-      localStorage.setItem('api_token', response.data.data.token);
-      
-      handle2Manager(navigate);
+
+  const { formState, handleOnChangeInput } = useForm(initialState);
+  const { email, password } = formState;
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const navigate = useNavigate();
+  
+  const handleOnSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!emailRegex.test(email)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Email inválido!',
+      });
+      return;
     }
-  } catch (error) {
-    console.error('Erro ao fazer login:', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: 'Erro ao fazer login. Verifique suas credenciais.',
-    });
-  }
-};
+
+    if (!password || password.length < 4) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Senha inválida! Deve ter pelo menos 4 caracteres.',
+      });
+      return;
+    }
+
+    const formData = {
+      email,
+      password
+    };
+    
+    try {
+      const response = await axios.post(`${BASE_API}/auth/sign-in`, formData);
+      if (response.status === 200 && response.data.data && response.data.data.token) {
+        localStorage.setItem('api_token', response.data.data.token);
+        handle2Manager(navigate);
+      }
+    } catch (error) {
+      console.error('Erro ao fazer login:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Erro ao fazer login. Verifique suas credenciais.',
+      });
+    }
+  };
+
   return (
-    <div>
-  <StyledForm>
-    <div>
-      <div className="bannerSignUp">
-        <h2 className="formTitle text-center text-purple-600 font-bold text-2xl">
-          <strong className="text-gray-900">Colab.</strong>Login
-        </h2>
-        <p className="slogan">Aproveite para LOGAR ou CADASTRE-SE</p>
-        <div className="flex-row justify-items-center justify-self-center align-items-center gap-2">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="glass p-8 rounded-3xl w-full max-w-md animate-slide-up">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-white mb-2 font-display">
+            <span className="text-white">Colab</span>
+            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Login</span>
+          </h2>
+          <p className="text-white/70 mb-6">Entre na sua conta e explore a música</p>
+          
           <button
             type="button"
-            className="middle none center mt-3 mr-3 rounded-lg bg-gradient-to-tr from-purple-600 to-purple-400 py-3 px-6 font-sans text-xs font-bold uppercase text-white shadow-md shadow-pink-500/20 transition-all hover:shadow-lg hover:shadow-purple-500/40 active:opacity-[0.85] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-            onClick={() => switchButtons(viewUser, setViewUser, 0)}
+            className="nav-button bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
+            onClick={() => setViewUser(0)}
           >
-            Click para CADASTRAR
+            ✨ Criar conta
           </button>
         </div>
+
+        {/* Form */}
+        <form onSubmit={handleOnSubmit} className="space-y-6">
+          {/* Email Field */}
+          <div className="space-y-2">
+            <label htmlFor="email" className="flex items-center gap-2 text-white/80 font-medium">
+              <MdEmail className="text-purple-400" />
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="seu@email.com"
+              required
+              value={email}
+              onChange={handleOnChangeInput}
+              className="input-modern w-full text-white placeholder-white/50"
+            />
+          </div>
+
+          {/* Password Field */}
+          <div className="space-y-2">
+            <label htmlFor="password" className="flex items-center gap-2 text-white/80 font-medium">
+              <FiLock className="text-purple-400" />
+              Senha
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              required
+              value={password}
+              onChange={handleOnChangeInput}
+              className="input-modern w-full text-white placeholder-white/50"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 px-6 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+          >
+            🔐 ENTRAR
+          </button>
+        </form>
+
+        {/* Additional Options */}
+        <div className="text-center mt-6">
+          <p className="text-white/60 text-sm">
+            Esqueceu sua senha?{' '}
+            <button 
+              type="button"
+              className="text-purple-400 hover:text-purple-300 underline transition-colors"
+              onClick={() => setViewUser(2)}
+            >
+              Recuperar conta
+            </button>
+          </p>
+        </div>
       </div>
-      <form className="signUpForm" onSubmit={handleOnSubmit}>
-        <div className="fieldset">
-          <label htmlFor="email" className='labelFieldset'><MdEmail /> Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="pepe123@gmail.com"
-            required
-            value={email}
-            onChange={handleOnChangeInput}
-          />
-        </div>
-        <div className="fieldset">
-          <label htmlFor="password" className='labelFieldset'><FiLock /> Senha</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="********"
-            required
-            value={password}
-            onChange={handleOnChangeInput}
-          />
-        </div>
-        <button
-          type='submit'
-          className="middle none center mr-3 rounded-lg bg-gradient-to-tr from-purple-600 to-purple-400 py-3 px-6 font-sans text-xs font-bold uppercase text-white shadow-md shadow-pink-500/20 transition-all hover:shadow-lg hover:shadow-purple-500/40 active:opacity-[0.85] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-        >
-          LOGAR
-        </button>
-      </form>
     </div>
-  </StyledForm>
-    </div>
-  )
+  );
 }
 
 

@@ -1,4 +1,3 @@
-// Exemplo de uso no componente
 import { useContext } from 'react';
 import { TokenContext } from '../../common/context/token-context';
 import { handle2Home, handle2Logout } from '../../router/coordinator';
@@ -15,8 +14,12 @@ export function LogoutButton() {
     handle2Home(navigate);
   };
 
-  return <button 
-                className="middle none center mt-3 mr-3 rounded-lg bg-gradient-to-tr from-pink-600 to-pink-400 py-3 px-6 font-sans text-xs font-bold uppercase text-white shadow-md shadow-red-500/20 transition-all hover:shadow-lg hover:shadow-pink-500/40 active:opacity-[0.85] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-
-  onClick={logout}>Logout</button>;
+  return (
+    <button 
+      className="nav-button bg-red-500/20 border-red-400/30 hover:bg-red-500/30 hover:border-red-400/50 text-red-100 hover:text-white"
+      onClick={logout}
+    >
+      🚪 LOGOUT
+    </button>
+  );
 }
