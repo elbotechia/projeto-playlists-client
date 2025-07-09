@@ -1,1 +1,1 @@
-export const BASE_API = 'http://localhost:3003/api';
+export const BASE_API = 'https://projeto-playlists-node-2k25.onrender.com/api';
