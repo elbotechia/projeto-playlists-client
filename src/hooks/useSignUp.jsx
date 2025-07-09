@@ -11,7 +11,7 @@ export default function useSignUp({API_URL = BASE_API, path=""}) {
     setLoading(true)
     setError(null)
     try {
-      const response = await axios.post(`http://localhost:3003/api/auth/sign-up`, {
+      const response = await axios.post(`https://projeto-playlists-node-2k25.onrender.com/api/auth/sign-up`, {
         name: username,
         password: passwordConfirm,
         email

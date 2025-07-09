@@ -33,7 +33,7 @@ export const CardTrack = ({ track }) => {
             <div className="mt-auto">
               {fetchAudio.data.data != null && fetchAudio.data.data != undefined ? (
                 <div className="flex justify-center">
-                  <PlayPauseButton src={`http://localhost:3003/${fetchAudio.data.data.filename}`} />
+                  <PlayPauseButton src={`https://projeto-playlists-node-2k25.onrender.com/${fetchAudio.data.data.filename}`} />
                 </div>
               ) : (
                 <div className="flex items-center justify-center space-x-2 text-gray-500">

@@ -5,7 +5,7 @@ export const TracksContext = createContext();
 export const TracksProvider = ({ children }) => {
     
     const {tracks, isLoading, isError}= useFetch(
-        "http://localhost:3003/api", "tracks", []);
+        "https://projeto-playlists-node-2k25.onrender.com/api", "tracks", []);
 
       console.log(tracks)
 
