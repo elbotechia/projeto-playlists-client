@@ -183,7 +183,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🔗 Backend API
 
 This frontend application connects to the backend API:
-- **Repository**: [projeto-playlists-node-2k25](https://github.com/username/projeto-playlists-node-2k25)
+- **Repository**: [projeto-playlists-node-2k25](https://github.com/elbotechia/projeto-playlists-node)
 - **API Documentation**: Available at the backend repository
 
 ## 📞 Support
@@ -192,4 +192,4 @@ For support, please open an issue in the GitHub repository or contact the develo
 
 ---
 
-Made with ❤️ by <a href="https://github.com/botechia-erika" target="_blank">@botechia-erika</a>
+Made with ❤️ by <a href="https://github.com/elbotechia" target="_blank">@elbotechia</a>
